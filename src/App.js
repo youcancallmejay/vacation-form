@@ -5,13 +5,22 @@ import './App.css';
 function App() {
 
   const[vacationList, setVacationList] = useState([])
+  const[contactFormList, setContactFormList] = useState([]);
 
   function handleAddItems(item){
     setVacationList((vacationList) => [...vacationList, item])
   }
 
+  function HandleAddContactFormItem(item){
+    setContactFormList((contactFormList) => [...contactFormList, item])
+  }
+
   function handleDeleteItem(id){
-    setVacationList((vacationList) => vacationList.filter((item) => item.id != id ))
+    setVacationList((vacationList) => vacationList.filter((item) => item.id !== id ))
+  }
+
+  function handleDeleteContact(id){
+    setContactFormList((contactFormList) => contactFormList.filter((item) => item.id !== id))
   }
 
   return (
@@ -19,34 +28,68 @@ function App() {
       <header className="App-header">
       <Form onAddItems={handleAddItems}/>
       <DisplayList list={vacationList} onDeleteItem={handleDeleteItem}/>
-      <ContactForm />
+      <ContactForm onAddContactList={HandleAddContactFormItem}/>
+      <DisplayContactList list={contactFormList} onDeleteContact={handleDeleteContact}/>
       </header>
     </div>
   );
 }
 
 
+function DisplayContactList({list, onDeleteContact}){
+  return(
+    <div>
+      <ul>
+        {list.map((item) => (
+          <li>
+            <button onClick={() => onDeleteContact(item.id)}>Remove</button>
+            {item.fullName} {item.gender} {item.age}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
 
-function ContactForm(){
+
+function ContactForm({onAddContactList}){
+  const [fullName, setFullName] = useState();
+  const [age, setAge] = useState();
+  const [gender, setGender] = useState();
+
+
+  function handleSubmit(e){
+    e.preventDefault();
+    const newItem = {fullName, age, gender, id: Date.now}
+    if(!fullName) return;
+
+    onAddContactList(newItem)
+
+    setFullName("")
+    setAge(18)
+    setGender()
+  }
  
   return(
     <div>
       <h3>Enter your contact information</h3>
-      <form  className="form1">
-        <input type="text" placeholder="First and Last Name"></input>
+      <form  className="form1" onSubmit={(e) => handleSubmit(e)}>
+        <input type="text" placeholder="First and Last Name" value={fullName} onChange={(e) => setFullName(e.target.value)}  ></input>
+        <select value={age} onChange={(e) => setAge(e.target.value)}>
+        {Array.from({length: 82}, (_, i) => i+18).map((num) => <option key={num}>{num}</option>)}            
+        </select>
+
         <p>
           <label>
-            <input type='radio' value="option1" name="myRadio"/>
+            <input type='radio' value="option1" name="myRadio" onClick={() => setGender('male')}/>
             Male
           </label>
-
           <label>
-            <input type='radio' value="option2" name="myRadio" />
+            <input type='radio' value="option2" name="myRadio" onClick={() => setGender('female')}  />
             Female
           </label>
         </p>
-
-        
+        <button>Submit Contact Info</button>
       </form>
     </div>
   )
